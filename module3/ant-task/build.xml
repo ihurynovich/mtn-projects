@@ -1,0 +1,70 @@
+<project name="Project" default="dist" basedir=".">
+
+  <target name="init">
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="test"  location="test"/>
+    <property name="lib"  location="lib"/>
+    <property name="config"  location="config"/>
+    <property name="lib"  location="lib"/>
+    <property name="dist"  location="dist"/>
+
+     <tstamp>
+      <format property="TODAY_UK" pattern="yyyy-MM-dd_hh-mm" locale="en,EN"/>
+    </tstamp>
+    <echo>current time and date is ${TODAY_UK}</echo>
+    <path id="classpath">
+        <fileset dir="${lib}">
+          <include name="**/*.jar" />
+        </fileset>
+    </path>
+  </target>
+
+    <target name="clean" depends="init">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+  <target name="compile" depends="clean">
+    <mkdir dir="${build}"/>
+    <javac srcdir="${src}" destdir="${build}" includeantruntime="false">
+      <classpath>
+        <fileset dir="${lib}">
+          <include name="**/*.jar" />
+        </fileset>
+      </classpath>
+    </javac>
+  </target>
+
+     <target name="junit" depends="compile">
+        <junit printsummary="yes" fork="yes" haltonfailure="no" showoutput="yes">
+            <classpath refid="classpath"/>
+            <classpath location="build"/>
+            <formatter type="xml"/>
+            <batchtest todir="${test}">
+                <fileset dir="${test}">
+                  <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+  <target name="jar" depends="junit">
+    <mkdir dir="${dist}"/>
+    <jar jarfile="${dist}/Ant-task.jar" basedir="${build}">
+      <manifest>
+        <attribute name="Main-Class" value="com.test.Project"/>
+      </manifest>
+    </jar>
+  </target>
+
+<target name="dist" depends="jar">
+      <copy todir="${dist}">
+        <fileset dir="${lib}"/>
+      </copy>
+      <copy file="${config}/project.properties" todir="${dist}"/>
+    <zip destfile="${dist}/${TODAY_UK}_project.zip"
+    basedir="${dist}"/>
+</target>
+
+</project>
